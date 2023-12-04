@@ -6,7 +6,8 @@
 #define DEBUG_HX711
 
 // calibration parameter from calibrating code with known values
-#define CALIBRATION_FACTOR 187326.0
+#define CALIBRATION_FACTOR 249236.0
+#define offs_weight 0.00;
 
 // Create the lcd object address 0x3F and 16 columns x 2 rows
 LiquidCrystal_I2C lcd(0x27, 16, 2);
@@ -25,7 +26,7 @@ Servo servo2;
 void setup() {
   lcd.init();
   lcd.backlight();
-  lcd.print("WEIGHT SCALE");  
+  lcd.print("WEIGHT SCALE");
 
 #ifdef DEBUG_HX711
   // Initialize serial communication
@@ -41,13 +42,15 @@ void setup() {
   //Assuming there is no weight on the scale at start up, reset the scale to 0
   scale.tare();
 
+  //----------------------------------------------------------------------------//
   servo1.attach(9);
   servo2.attach(10);
   pinMode(dcmotor_pin, OUTPUT);
 
   //---------------------------- init process-----------------------------------//
-
-
+  delay(1500);  
+  servo1.write(180);
+  servo2.write(180);
 }
 
 float weight;
@@ -55,12 +58,21 @@ float weight;
 void loop() {
   weight = scale.get_units();
   displayWeight(weight);
-  if(weight > 4) {
-    lcd.setCursor(0, 1);
+
+  if (weight > 2.00) {
+    lcd.clear();
+    lcd.setCursor(0, 0);
     lcd.print("Bucket Full!");
+    lcd.setCursor(0, 1);
+    lcd.print("Remove salt");
     //stop dcmotor
-    return;
+    dcmotorOff();
+
+    delay(5000);
+    //exit(0);
   }
+
+  delay(50);
 }
 
 void displayWeight(float weight) {
@@ -72,10 +84,18 @@ void displayWeight(float weight) {
 #endif
   lcd.setCursor(0, 1);
   lcd.print("Reading:");
-  lcd.print(scale.get_units(), 2);
+  lcd.print(getWeight(), 2);
   lcd.print(" Kgs");
 }
 
+float getWeight() {
+  return scale.get_units() - offs_weight;
+}
+
 void dcmotorOn() {
-  
+  digitalWrite(dcmotor_pin, HIGH);
+}
+
+void dcmotorOff() {
+  digitalWrite(dcmotor_pin, LOW);
 }
