@@ -8,7 +8,7 @@ byte pinClk = 2;
  
 HX711 scale;
 //Parameter to calibrate weight and sensor, different for different sensors
-float calibration_factor = 137326; //put some value and adjust it through serial monitor 
+float calibration_factor = -87326; //put some value and adjust it through serial monitor 
  
 void setup() {
   Serial.begin(9600);
